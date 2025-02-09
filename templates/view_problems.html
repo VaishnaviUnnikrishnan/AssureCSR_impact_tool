@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Problems</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        /* General Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: linear-gradient(135deg, #A569BD, #D2B4DE);
+            color: #2E1A47;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 36px;
+            color: #2E1A47;
+            margin-bottom: 20px;
+            text-shadow: 0px 3px 8px rgba(142, 68, 173, 0.6);
+        }
+
+        /* Table Styling */
+        table {
+            width: 90%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            box-shadow: 0px 10px 50px rgba(142, 68, 173, 0.4);
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(142, 68, 173, 0.3);
+        }
+
+        th {
+            background-color: rgba(142, 68, 173, 0.5);
+            color: white;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Button Styling */
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #2E1A47;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease-in-out;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #A569BD;
+            box-shadow: 0px 0px 8px #A569BD;
+        }
+
+        .btn-back {
+            display: block;
+            width: fit-content;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        /* Message Styling */
+        .no-instances {
+            text-align: center;
+            font-size: 18px;
+            color: #2E1A47;
+            margin-top: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            table {
+                width: 100%;
+            }
+
+            h2 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2>Matching Instances</h2>
+    {% if instances %}
+    <table>
+        <thead>
+            <tr>
+                <th>Location (Pincode)</th>
+                <th>Budget</th>
+                <th>SubCategory</th>
+                <th>MainCategory</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for instance in instances %}
+            <tr>
+                <td>{{ instance['Location (Pincode)'] }}</td>
+                <td>{{ instance['Budget'] }}</td>
+                <td>{{ instance['SubCategory'] }}</td>
+                <td>{{ instance['MainCategory'] }}</td>
+                <td>
+                    <form action="/dashboard" method="post">
+                        <input type="hidden" name="category" value="{{ instance['MainCategory'] }}">
+                        <input type="hidden" name="subcategory" value="{{ instance['SubCategory'] }}">
+                        <input type="hidden" name="pincode" value="{{ instance['Location (Pincode)'] }}">
+                        <input type="hidden" name="budget" value="{{ instance['Budget'] }}">
+                        <button type="submit" class="btn">Submit</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="no-instances">No matching instances found.</p>
+    {% endif %}
+    <a href="/input" class="btn btn-back">Go Back</a>
+</body>
+</html>
