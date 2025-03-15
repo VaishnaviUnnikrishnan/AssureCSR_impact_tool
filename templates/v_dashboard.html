@@ -3,196 +3,283 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Dashboard</title>
+    <title>Survey Results Dashboard</title>
     <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script src="https://code.highcharts.com/modules/heatmap.js"></script>
-    <script src="https://code.highcharts.com/modules/treemap.js"></script>
-    <script src="https://code.highcharts.com/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
-    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
-        /* General Styling */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
-            scroll-behavior: smooth;
         }
 
         body {
             background: linear-gradient(135deg, #A569BD, #D2B4DE);
             color: black;
+            min-height: 100vh;
             padding: 20px;
+        }
+
+        #loadingStatus {
             text-align: center;
+            color: white;
+            margin: 20px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
         }
 
-        h2 {
-            font-size: 36px;
-            color: #2E1A47;
-            margin-bottom: 20px;
-            text-shadow: 0px 3px 8px rgba(142, 68, 173, 0.6);
-        }
-
-        /* Dashboard Container */
         .dashboard-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
             padding: 20px;
-            max-width: 1600px;
-            margin: 0 auto;
         }
 
         .chart-box {
-            width: 100%;
-            height: 400px;
             background: rgba(255, 255, 255, 0.3);
             backdrop-filter: blur(20px);
             border-radius: 15px;
             box-shadow: 0px 10px 50px rgba(142, 68, 173, 0.4);
             padding: 20px;
-            transition: all 0.3s ease-in-out;
+            height: 400px;
         }
 
-        .chart-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0px 15px 60px rgba(142, 68, 173, 0.6);
-        }
-
-        /* Home Button */
-        .home-button {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 20px;
-            font-size: 18px;
-            color: white;
-            background: #8E44AD;
-            border: none;
-            border-radius: 8px;
-            text-decoration: none;
-            transition: 0.3s;
-        }
-
-        .home-button:hover {
-            background: #6C3483;
-            transform: scale(1.05);
-        }
-
-        /* Footer */
-        .footer {
+        h2 {
             text-align: center;
-            padding: 20px;
-            font-size: 14px;
-            color: white;
-            background: rgba(142, 68, 173, 0.5);
-            width: 100%;
-            position: fixed;
-            bottom: 0;
+            color: #2E1A47;
+            margin: 20px 0;
+            font-size: 24px;
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
             .dashboard-container {
                 grid-template-columns: 1fr;
-            }
-
-            h2 {
-                font-size: 28px;
             }
         }
     </style>
 </head>
 <body>
-
-    <h2>Project Dashboard</h2>
+    <h2>Survey Results Dashboard</h2>
+    <div id="loadingStatus">Loading data...</div>
 
     <div class="dashboard-container">
-        <div id="chart1" class="chart-box"></div>
-        <div id="chart2" class="chart-box"></div>
-        <div id="chart3" class="chart-box"></div>
-        <div id="chart4" class="chart-box"></div>
-        <div id="chart5" class="chart-box"></div>
-        <div id="chart6" class="chart-box"></div>
-        <div id="chart7" class="chart-box"></div>
-        <div id="chart8" class="chart-box"></div>
-        <div id="chart9" class="chart-box"></div>
-        <div id="chart10" class="chart-box"></div>
-    </div>
-
-    <!-- Home Button -->
-    <a href="{{ url_for('home') }}" class="home-button">Go to Home</a>
-
-    <div class="footer">
-        © 2025 ASSURE-CSR | Designed for Impact |
-        <a href="{{ url_for('home') }}" style="color: white; text-decoration: underline;">Go to Home</a>
+        <div id="metricsChart" class="chart-box"></div>
+        <div id="performanceChart" class="chart-box"></div>
+        <div id="distributionChart" class="chart-box"></div>
+        <div id="summaryChart" class="chart-box"></div>
     </div>
 
     <script>
-        // Auto redirect to home after 5 seconds
-        setTimeout(() => {
-            window.location.href = "{{ url_for('home') }}";
-        }, 5000);
-
-        // Survey data passed from Flask
-        const surveyData = {{ survey_data | tojson | safe }};
-
-        // Function to generate random colors for charts
-        const getRandomColor = () => {
-            const letters = '0123456789ABCDEF';
-            let color = '#';
-            for (let i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
+        async function loadData() {
+            try {
+                const response = await fetch('/static/survey_results.xlsx');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch Excel file');
+                }
+                const blob = await response.blob();
+                return processExcelData(blob);
+            } catch (error) {
+                document.getElementById('loadingStatus').textContent = 'Error loading data: ' + error.message;
+                console.error('Error loading data:', error);
+                // Use sample data for testing
+                return [{
+                    project: 'healthcare',
+                    'Number of Medical Camps Organized': 50,
+                    'Patients Treated': 59,
+                    'Vaccination Coverage (%)': 63,
+                    'Reduction in Disease Incidents (%)': 96,
+                    'Health Awareness Campaigns Conducted': 85
+                    // ... add more sample data as needed
+                }];
             }
-            return color;
-        };
+        }
 
-        // Function to extract data for charts
-        const extractChartData = (data, project) => {
-            const projectData = data.filter(item => item.project === project);
-            if (!projectData.length) return null;
-
-            // Aggregate data for all entries of the same project
-            const metrics = {};
-            projectData.forEach(entry => {
-                Object.entries(entry).forEach(([key, value]) => {
-                    if (key !== 'project' && typeof value === 'number') {
-                        if (!metrics[key]) metrics[key] = 0;
-                        metrics[key] += value;
+        function processExcelData(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                        console.log('Loaded Excel data:', jsonData);
+                        resolve(jsonData);
+                    } catch (error) {
+                        reject(error);
                     }
-                });
+                };
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function createMetricsChart(data) {
+            const metrics = Object.keys(data[0]).filter(key => key !== 'project');
+            const values = metrics.map(metric => data[0][metric]);
+
+            Highcharts.chart('metricsChart', {
+                chart: {
+                    type: 'column',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                },
+                title: {
+                    text: 'Key Metrics Overview',
+                    style: { color: '#2E1A47' }
+                },
+                xAxis: {
+                    categories: metrics,
+                    labels: {
+                        rotation: -45,
+                        style: { fontSize: '10px' }
+                    }
+                },
+                yAxis: {
+                    title: { text: 'Value' },
+                    max: 100
+                },
+                series: [{
+                    name: 'Score',
+                    data: values,
+                    color: '#8E44AD'
+                }],
+                credits: { enabled: false }
+            });
+        }
+
+        function createPerformanceChart(data) {
+            const metrics = Object.keys(data[0]).filter(key => key !== 'project');
+            const values = metrics.map(metric => data[0][metric]);
+
+            Highcharts.chart('performanceChart', {
+                chart: {
+                    type: 'line',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                },
+                title: {
+                    text: 'Performance Trends',
+                    style: { color: '#2E1A47' }
+                },
+                xAxis: {
+                    categories: metrics,
+                    labels: {
+                        rotation: -45,
+                        style: { fontSize: '10px' }
+                    }
+                },
+                yAxis: {
+                    title: { text: 'Value' },
+                    max: 100
+                },
+                series: [{
+                    name: 'Score',
+                    data: values,
+                    color: '#2ECC71'
+                }],
+                credits: { enabled: false }
+            });
+        }
+
+        function createDistributionChart(data) {
+            const valueRanges = {
+                '0-20': 0,
+                '21-40': 0,
+                '41-60': 0,
+                '61-80': 0,
+                '81-100': 0
+            };
+
+            Object.entries(data[0]).forEach(([key, value]) => {
+                if (key !== 'project') {
+                    if (value <= 20) valueRanges['0-20']++;
+                    else if (value <= 40) valueRanges['21-40']++;
+                    else if (value <= 60) valueRanges['41-60']++;
+                    else if (value <= 80) valueRanges['61-80']++;
+                    else valueRanges['81-100']++;
+                }
             });
 
-            return Object.entries(metrics).map(([name, y]) => ({ name, y }));
-        };
-
-        // Chart configurations
-        const chartConfigs = [
-            { type: 'column', title: 'Training Metrics', project: 'education' },
-            { type: 'line', title: 'Progress Over Time', project: 'healthcare' },
-            { type: 'bar', title: 'Performance Comparison', project: 'environment' },
-            { type: 'pie', title: 'Task Distribution', project: 'welfare' },
-            { type: 'area', title: 'Engagement Growth', project: 'rural' },
-            { type: 'scatter', title: 'Score Distribution', project: 'disaster' },
-            { type: 'heatmap', title: 'User Activity', project: 'education' },
-            { type: 'treemap', title: 'Resource Allocation', project: 'healthcare' },
-            { type: 'column', title: 'Income Growth', project: 'rural' },
-            { type: 'pie', title: 'Disease Reduction', project: 'healthcare' }
-        ];
-
-        // Render charts
-        chartConfigs.forEach((config, index) => {
-            const chartData = extractChartData(surveyData, config.project);
-
-            Highcharts.chart(`chart${index + 1}`, {
-                chart: { type: config.type },
-                title: { text: `${config.title} - ${config.project}` },
-                series: [{ name: config.project, data: chartData || [{ name: 'Metric 1', y: 10 }] }]
+            Highcharts.chart('distributionChart', {
+                chart: {
+                    type: 'pie',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                },
+                title: {
+                    text: 'Score Distribution',
+                    style: { color: '#2E1A47' }
+                },
+                series: [{
+                    name: 'Metrics',
+                    data: Object.entries(valueRanges).map(([range, count]) => ({
+                        name: range,
+                        y: count
+                    }))
+                }],
+                credits: { enabled: false }
             });
-        });
+        }
+
+        function createSummaryChart(data) {
+            const metrics = Object.keys(data[0]).filter(key => key !== 'project');
+            const values = metrics.map(metric => data[0][metric]);
+            const average = values.reduce((a, b) => a + b, 0) / values.length;
+            const max = Math.max(...values);
+            const min = Math.min(...values);
+
+            Highcharts.chart('summaryChart', {
+                chart: {
+                    type: 'column',
+                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                },
+                title: {
+                    text: 'Summary Statistics',
+                    style: { color: '#2E1A47' }
+                },
+                xAxis: {
+                    categories: ['Average Score', 'Highest Score', 'Lowest Score']
+                },
+                yAxis: {
+                    title: { text: 'Value' },
+                    max: 100
+                },
+                series: [{
+                    name: 'Statistics',
+                    data: [
+                        { y: average, color: '#3498DB' },
+                        { y: max, color: '#2ECC71' },
+                        { y: min, color: '#E74C3C' }
+                    ]
+                }],
+                credits: { enabled: false }
+            });
+        }
+
+        async function initializeDashboard() {
+            try {
+                const data = await loadData();
+                console.log('Processed data:', data);
+
+                if (data && data.length > 0) {
+                    document.getElementById('loadingStatus').textContent = 'Data loaded successfully!';
+                    createMetricsChart(data);
+                    createPerformanceChart(data);
+                    createDistributionChart(data);
+                    createSummaryChart(data);
+                } else {
+                    document.getElementById('loadingStatus').textContent = 'No data available';
+                }
+            } catch (error) {
+                document.getElementById('loadingStatus').textContent = 'Error initializing dashboard: ' + error.message;
+                console.error('Dashboard initialization error:', error);
+            }
+        }
+
+        // Initialize when document is ready
+        document.addEventListener('DOMContentLoaded', initializeDashboard);
     </script>
-
 </body>
 </html>

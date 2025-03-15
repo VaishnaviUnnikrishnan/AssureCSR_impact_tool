@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progress Report</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        /* General Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: linear-gradient(135deg, #A569BD, #D2B4DE);
+            color: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #2E1A47;
+            font-size: 30px;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            box-shadow: 0px 10px 50px rgba(142, 68, 173, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .section h2 {
+            color: #2E1A47;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .bullet-list {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+
+        .bullet-list li {
+            margin-bottom: 10px;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .success-message {
+            color: green;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #2E1A47;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        a:hover {
+            background: #A569BD;
+            box-shadow: 0px 0px 8px #A569BD;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+            color: white;
+            background: rgba(142, 68, 173, 0.5);
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .section {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .section h2 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>📊 Progress Report</h1>
+
+    <div class="section">
+        <h2>📌 New Health Programs Introduced</h2>
+        {% if new_entries.empty %}
+            <p>No new programs were introduced in this period.</p>
+        {% else %}
+            <ul class="bullet-list">
+                {% for _, row in new_entries.iterrows() %}
+                    <li>Pincode: {{ row['pincode'] }}, Budget: ₹{{ row['budget'] }}, Company ID: {{ row['company id'] }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <h2>🚨 Programs No Longer Active</h2>
+        {% if removed_entries.empty %}
+            <p>All previous programs are still running.</p>
+        {% else %}
+            <ul class="bullet-list">
+                {% for _, row in removed_entries.iterrows() %}
+                    <li>Company ID: {{ row['company id'] }}, Pincode: {{ row['pincode'] }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <h2>📈 Comparison Stories</h2>
+        {% if not improvements.empty %}
+            <h3>✅ Improvements</h3>
+            <ul class="bullet-list">
+                {% for _, row in improvements.iterrows() %}
+                    <li>Company ID: {{ row['company id'] }}, Old: {{ row['% increase in overall community health_old'] }}%, New: {{ row['% increase in overall community health_new'] }}%</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No significant improvements recorded.</p>
+        {% endif %}
+
+        {% if not declines.empty %}
+            <h3>⚠️ Declines</h3>
+            <ul class="bullet-list">
+                {% for _, row in declines.iterrows() %}
+                    <li>Company ID: {{ row['company id'] }}, Old: {{ row['% increase in overall community health_old'] }}%, New: {{ row['% increase in overall community health_new'] }}%</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No major declines noted.</p>
+        {% endif %}
+    </div>
+
+    <h2>📊 Performance Charts</h2>
+    <img src="{{ url_for('static', filename='performance_chart.png') }}" alt="Performance Chart">
+    <img src="{{ url_for('static', filename='line_chart.png') }}" alt="Line Chart">
+
+    <a href="{{ pdf_filename }}" download>📥 Download Progress Report (PDF)</a>
+
+
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Options</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        /* General Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: linear-gradient(135deg, #A569BD, #D2B4DE);
+            color: black;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h2 {
+            font-size: 2em;
+            color: #2E1A47;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.2em;
+            text-align: center;
+            width: 250px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            background-color: #2E1A47;
+            color: white;
+            transition: all 0.3s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            background-color: #A569BD;
+            box-shadow: 0px 0px 8px #A569BD;
+        }
+
+        .icon {
+            margin-right: 10px;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            padding: 10px;
+            background: rgba(142, 68, 173, 0.5);
+            color: white;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 1.5em;
+            }
+
+            .btn {
+                width: 200px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Welcome! Please choose an option:</h2>
+
+    <div class="button-container">
+        <!-- Button for User Login -->
+        <form method="POST">
+            <button type="submit" name="submit_info" class="btn">
+                <i class="fas fa-user icon"></i> User Login
+            </button>
+        </form>
+
+        <!-- Button for Feedback Form -->
+        <form method="POST">
+            <button type="submit" name="submit_feedback" class="btn">
+                <i class="fas fa-pencil-alt icon"></i> Feedback Form
+            </button>
+        </form>
+    </div>
+
+    <div class="footer">
+        <p>© 2025 ASSURE-CSR | All Rights Reserved</p>
+    </div>
+
+</body>
+</html>

@@ -1,12 +1,17 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 import os
 import pandas as pd
 import folium
 from folium.plugins import MarkerCluster
-from flask import send_file
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import io
+import csv
+import re
+from collections import Counter
+from textblob import TextBlob
+import spacy
+import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Required for session management
@@ -23,7 +28,9 @@ user_data_path = "user_data.csv"
 # Path to survey_results.xlsx
 SURVEY_RESULTS_FILE = "survey_results.xlsx"
 
-# Define survey questions for each project
+
+
+
 SURVEY_QUESTIONS = {
     "education": [
         "Number of Training Sessions Conducted",
@@ -202,6 +209,20 @@ def home():
     return render_template("home.html")
 
 
+# Route: User Options
+@app.route("/user_options", methods=["GET", "POST"])
+def user_options():
+    if request.method == "POST":
+        print(request.form)  # Debugging: Print the form data
+        if "submit_info" in request.form:
+            print("User Info button clicked")  # Debugging log
+            return redirect(url_for("user"))
+        elif "submit_feedback" in request.form:
+            print("Feedback Form button clicked")  # Debugging log
+            return redirect(url_for("feedback_form"))
+    return render_template("user_options.html")
+
+
 # Route: User Login
 @app.route("/user_login", methods=["GET", "POST"])
 def user():
@@ -211,7 +232,9 @@ def user():
     return render_template("user_login.html")
 
 
-# Route: Volunteer Login
+
+
+
 @app.route("/volunteer_login", methods=["GET", "POST"])
 def volunteer_login():
     if request.method == "POST":
@@ -264,6 +287,8 @@ def survey():
         return redirect(url_for("v_dashboard"))
 
     return render_template("survey.html", project=project, questions=questions)
+
+
 @app.route("/v_dashboard", methods=["GET"])
 def v_dashboard():
     if not session.get("logged_in"):
@@ -275,6 +300,8 @@ def v_dashboard():
     else:
         survey_data = []
     return render_template("v_dashboard.html", survey_data=survey_data)
+
+
 # Route: Company Login
 @app.route("/company_login", methods=["GET", "POST"])
 def company_login():
@@ -359,7 +386,6 @@ def input_page():
 
     return render_template("input.html")
 
-
 # Route: View Problems
 @app.route("/view_problems", methods=["GET", "POST"])
 def view_problems():
@@ -424,5 +450,188 @@ def user_input():
 
     return render_template("user_login.html")
 
+
+# Feedback and PDF Generation
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PDF_FOLDER = os.path.join(BASE_DIR, "pdfs")
+CSV_FILE = os.path.join(BASE_DIR, "feedback_data.csv")
+os.makedirs(PDF_FOLDER, exist_ok=True)
+
+nlp = spacy.load("en_core_web_sm")
+
+FEEDBACK_CATEGORIES = [
+    "CSR Hackathons", "Afforestation", "Emergency Aid",
+    "Households Utility Reports", "Medical Camps", "Women Empowerment"
+]
+
+if not os.path.exists(CSV_FILE):
+    with open(CSV_FILE, "w", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        writer.writerow(
+            ["Company Name", "Location", "Date", "Report Type", "Report", "Sentiment", "Keywords", "Extracted Numbers"])
+
+
+@app.route("/feedback")
+def feedback_form():
+    """Render the feedback form."""
+    return render_template("form.html", categories=FEEDBACK_CATEGORIES)
+
+
+@app.route("/submit", methods=["POST"])
+def submit_feedback():
+    """Process and store feedback while generating PDF."""
+    company_name = request.form.get("company_name")
+    location = request.form.get("location")
+    date_of_completion = request.form.get("date_of_completion")
+    report_type = request.form.get("report_type")
+    report = request.form.get("report")
+
+    if len(report.split()) < 100:
+        return render_template("form.html", categories=FEEDBACK_CATEGORIES,
+                               error="The report must contain at least 100 words.")
+
+    safe_company_name = re.sub(r'\W+', '_', company_name)
+    pdf_filename = os.path.join(PDF_FOLDER, f"{safe_company_name}_{report_type}.pdf")
+
+    sentiment_score = TextBlob(report).sentiment.polarity
+    sentiment = "Positive" if sentiment_score > 0 else "Negative" if sentiment_score < 0 else "Neutral"
+
+    doc = nlp(report)
+    keywords = [token.text.lower() for token in doc if token.is_alpha and not token.is_stop]
+    keyword_freq = Counter(keywords).most_common(5)
+    keyword_str = ", ".join([kw[0] for kw in keyword_freq])
+
+    numbers = re.findall(r'\b\d+\b', report)
+    numbers_str = ", ".join(numbers)
+
+    c = canvas.Canvas(pdf_filename, pagesize=letter)
+    c.setFont("Helvetica-Bold", 14)
+    y = 750
+    c.drawString(50, y, f"{report_type} Feedback Report")
+    y -= 30
+    c.setFont("Helvetica", 12)
+
+    details = [
+        f"Company Name: {company_name}",
+        f"Location: {location}",
+        f"Date of Completion: {date_of_completion}",
+        f"Sentiment: {sentiment}",
+        f"Keywords: {keyword_str}",
+        f"Numbers: {numbers_str}",
+    ]
+
+    for line in details:
+        y -= 20
+        c.drawString(50, y, line)
+
+    c.save()
+
+    with open(CSV_FILE, "a", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        writer.writerow(
+            [company_name, location, date_of_completion, report_type, report, sentiment, keyword_str, numbers_str])
+
+    return send_file(pdf_filename, as_attachment=True)
+
+
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from reportlab.lib import colors
+from reportlab.platypus import Table, TableStyle
+import io
+
+@app.route("/track_progress", methods=["GET"])
+def track_progress():
+    # Load the necessary data
+    historical = pd.read_csv("historical.csv")
+    user = pd.read_csv("user.csv")
+
+    # Standardize column names
+    historical.columns = historical.columns.str.lower().str.strip()
+    user.columns = user.columns.str.lower().str.strip()
+
+    # Ensure necessary columns exist
+    required_columns = [
+        "pincode", "budget", "company id", "% patients diagnosed & treated",
+        "% decrease in reported illnesses", "% patients screened for diseases",
+        "% patients receiving follow-up treatment", "% increase in vaccination coverage",
+        "% people attending awareness programs", "% increase in overall community health"
+    ]
+
+    for col in required_columns:
+        if col not in user.columns:
+            raise KeyError(f"Error: Missing column '{col}' in user dataset!")
+
+    # Identify New and Removed Entries
+    new_entries = user[~user['company id'].isin(historical['company id'])]
+    removed_entries = historical[~historical['company id'].isin(user['company id'])]
+
+    # Detect Improvements and Declines
+    def detect_changes(old_df, new_df, metric):
+        merged = old_df.merge(new_df, on='company id', suffixes=('_old', '_new'))
+        improved = merged[merged[f'{metric}_new'] > merged[f'{metric}_old']]
+        declined = merged[merged[f'{metric}_new'] < merged[f'{metric}_old']]
+        return improved[['company id', f'{metric}_old', f'{metric}_new']], declined[
+            ['company id', f'{metric}_old', f'{metric}_new']]
+
+    improvements, declines = detect_changes(historical, user, "% increase in overall community health")
+
+    # Generate Bar Chart
+    plt.figure(figsize=(8, 4))
+    plt.bar(["Improved Programs", "Declined Programs"], [len(improvements), len(declines)], color=['pink', 'violet'])
+    plt.xlabel("Program Performance")
+    plt.ylabel("Number of Programs")
+    plt.title("Health Program Performance Overview")
+    plt.savefig("static/performance_chart.png")
+
+    # Generate Line Chart (Trends Over Time)
+    plt.figure(figsize=(8, 4))
+    user.groupby("pincode")["% increase in overall community health"].mean().plot(kind="line", marker="o", linestyle="-")
+    plt.xlabel("Pincode")
+    plt.ylabel("Community Health Improvement (%)")
+    plt.title("Community Health Trends Over Different Pincodes")
+    plt.grid()
+    plt.savefig("static/line_chart.png")
+
+    # Generate PDF Report with Bullet Points and Charts
+    pdf_filename = "static/progress_report.pdf"
+    c = canvas.Canvas(pdf_filename, pagesize=letter)
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(50, 750, "Progress Report")
+
+    # Bullet Points Function
+    def draw_bullet_points(canvas, y_start, title, items):
+        canvas.setFont("Helvetica-Bold", 12)
+        canvas.drawString(50, y_start, title)
+        y = y_start - 20
+        canvas.setFont("Helvetica", 11)
+        if items.empty:
+            canvas.drawString(60, y, "- No updates for this period.")
+        else:
+            for _, row in items.iterrows():
+                text = f"- {row.to_list()}"
+                canvas.drawString(60, y, text[:90])  # Limit length
+                y -= 20
+        return y - 10
+
+    # Adding Sections with Bullet Points
+    y_position = 730
+    y_position = draw_bullet_points(c, y_position, "📌 New Health Programs Introduced:", new_entries)
+    y_position = draw_bullet_points(c, y_position, "🚨 Programs No Longer Active:", removed_entries)
+    y_position = draw_bullet_points(c, y_position, "📈 Improvements:", improvements)
+    y_position = draw_bullet_points(c, y_position, "⚠️ Declines:", declines)
+
+    # Add Images (Bar Chart and Line Chart)
+    c.drawImage("static/performance_chart.png", 50, y_position - 180, width=400, height=150)
+    c.drawImage("static/line_chart.png", 50, y_position - 360, width=400, height=150)
+
+    c.save()
+
+    return render_template("progress_report.html", improvements=improvements, declines=declines,
+                           new_entries=new_entries, removed_entries=removed_entries, pdf_filename=pdf_filename)
+
+@app.route("/success")
+def success():
+    return render_template("success.html")
 if __name__ == "__main__":
     app.run(debug=True)
