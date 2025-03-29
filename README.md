@@ -77,17 +77,14 @@ This project is licensed under the MIT License.
 Contact
 For any queries, reach out to v.ukrishnan8@gmail.com.
 
-![Screenshot 2025-03-15 175748](https://github.com/user-attachments/assets/00b027d0-b688-4e9c-bc9b-f49a1f1312ce)
+![Screenshot 2025-03-15 175748](https://github.com/user-attachments/assets/58c23f62-6814-4ef7-ac29-5123402ac6fc)
 
-![Screenshot 2025-03-15 175800](https://github.com/user-attachments/assets/3a40512b-85c1-4b00-9862-931011e8689c)
+![Screenshot 2025-03-15 180056](https://github.com/user-attachments/assets/5b35b49d-78f1-4359-86b3-6f73a6a39324)
 
-![Screenshot 2025-03-15 175814](https://github.com/user-attachments/assets/c50de386-6dfb-41f7-b783-7bd08e16fb9d)
+![Screenshot 2025-03-15 180116](https://github.com/user-attachments/assets/785cd525-022a-47e2-a01b-5fb27c26bcc8)
 
-![Screenshot 2025-03-15 180056](https://github.com/user-attachments/assets/5a03864e-bf97-435f-8af9-e9d6dc1de3ff)
+![Screenshot 2025-03-15 175845](https://github.com/user-attachments/assets/93d32a19-51e3-41d5-9a77-5a5a8545323a)
 
-![Screenshot 2025-03-15 175945](https://github.com/user-attachments/assets/97910e3a-a96d-4aff-8727-5f48aa89234d)
-
-
-
+![Screenshot 2025-03-15 175945](https://github.com/user-attachments/assets/1d71f335-dff6-43eb-8214-a2ec72308012)
 
 
