@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Success</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        /* General Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: linear-gradient(135deg, #A569BD, #D2B4DE);
+            color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Success Container */
+        .success-container {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            box-shadow: 0px 10px 50px rgba(142, 68, 173, 0.4);
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .success-container h1 {
+            font-size: 36px;
+            color: #2E1A47;
+            margin-bottom: 20px;
+            text-shadow: 0px 3px 8px rgba(142, 68, 173, 0.6);
+        }
+
+        .success-container p {
+            font-size: 18px;
+            color: black;
+            margin-bottom: 20px;
+        }
+
+        .success-container a {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #2E1A47;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .success-container a:hover {
+            background: #A569BD;
+            box-shadow: 0px 0px 8px #A569BD;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+            color: white;
+            background: rgba(142, 68, 173, 0.5);
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .success-container {
+                padding: 20px;
+            }
+
+            .success-container h1 {
+                font-size: 28px;
+            }
+
+            .success-container p {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Success Container -->
+    <div class="success-container">
+        <h1>User Data Submitted Successfully!</h1>
+        <p>Thank you for submitting your data. Your information has been successfully recorded.</p>
+        <a href="/">Go to Home</a>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        © 2025 ASSURE-CSR | Designed for Impact
+    </div>
+
+</body>
+</html>

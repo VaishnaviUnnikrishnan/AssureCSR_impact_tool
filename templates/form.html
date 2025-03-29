@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Corporate Social Responsibility (CSR) Feedback Form</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <style>
+        /* General reset and font */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: rgba(142, 68, 173, 0.5); /* Updated to match the footer color */
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(223, 146, 210, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #6f42c1; /* Violet color */
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            padding: 20px;
+            margin-bottom: 25px;
+            background: #eec8ee;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h3 {
+            color: #6f42c1; /* Violet color */
+            font-size: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 12px;
+            color: #555;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-top: 8px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        button {
+            width: 48%;
+            padding: 14px;
+            margin-top: 20px;
+            background: #6f42c1; /* Violet color */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #5a32a3; /* Darker violet color */
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .charts-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+
+        .chart {
+            width: 48%;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(231, 172, 216, 0.1);
+        }
+
+        .nlp-result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            font-size: 16px;
+            color: #555;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .report {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(194, 127, 178, 0.1);
+            font-size: 16px;
+            color: #555;
+        }
+
+        .form-header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 20px;
+            }
+            button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            .charts-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .chart {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Corporate Social Responsibility (CSR) Feedback Form</h2>
+    <form onsubmit="return false;">
+        <div class="section">
+            <h3>User Details</h3>
+            <label for="user_name">User Name:</label>
+            <input type="text" id="user_name" name="user_name" required>
+            <label for="company_name">Company Name:</label>
+            <input type="text" id="company_name" name="company_name" required>
+            <label for="amount_contributed">Amount Contributed (in ₹):</label>
+            <input type="number" id="amount_contributed" name="amount_contributed" required>
+            <label for="location">Location:</label>
+            <input type="text" id="location" name="location" required>
+        </div>
+
+        <div class="section">
+            <h3>CSR Project Type</h3>
+            <label for="reportType">Choose the CSR report type:</label>
+            <select id="reportType" onchange="updateForm()" required>
+                <option value="">Select...</option>
+                <option value="household">Household Utility</option>
+                <option value="medical">Medical Camps</option>
+                <option value="women">Women Empowerment</option>
+                <option value="education">Education Support</option>
+                <option value="environmental">Environmental Projects</option>
+                <option value="disaster">Disaster Relief</option>
+            </select>
+        </div>
+
+        <label for="report">Report Text (Details of CSR project):</label>
+        <textarea id="report" name="report" rows="4" required></textarea>
+
+        <div class="btn-group">
+            <button onclick="analyzeText()">Analyze Report</button>
+            <button onclick="generatePDF()">Generate PDF Report</button>
+        </div>
+    </form>
+
+    <div class="charts-container" id="chartsContainer"></div>
+
+    <div id="sentiment" class="nlp-result"></div>
+
+    <div id="reportResult" class="report"></div>
+</div>
+
+<script>
+    let chartData = [];
+    let metrics = [];
+    let csvContent = "";
+    let sentiment = "";
+
+    function updateForm() {
+        const selectedValue = document.getElementById("reportType").value;
+        const sections = document.querySelectorAll(".feedback-section");
+        sections.forEach(section => section.style.display = "none");
+
+        if (selectedValue) {
+            document.getElementById(selectedValue).style.display = "block";
+        }
+    }
+
+    function analyzeText() {
+        const reportText = document.getElementById("report").value.trim();
+        if (reportText.length === 0) {
+            alert("Please enter a report before analyzing.");
+            return;
+        }
+
+        sentiment = ["Positive", "Negative", "Neutral"][Math.floor(Math.random() * 3)];
+        document.getElementById("sentiment").innerHTML = "Sentiment: <b>" + sentiment + "</b>";
+
+        generateCSV(sentiment);
+        generateReport(sentiment);
+    }
+
+    function generateCSV(sentiment) {
+        const userName = document.querySelector("input[name='user_name']").value;
+        const companyName = document.querySelector("input[name='company_name']").value;
+        const amount = document.querySelector("input[name='amount_contributed']").value;
+        const location = document.querySelector("input[name='location']").value;
+        const reportType = document.getElementById("reportType").value;
+        const reportText = document.getElementById("report").value;
+
+        const metricsMap = {
+            "household": ["Electricity Savings", "Water Consumption", "Family Beneficiaries", "Hygiene Impact", "Satisfaction Rate"],
+            "medical": ["Patients Treated", "Medicines Distributed", "Doctors Participated", "Satisfaction Rate", "Follow-ups Done"],
+            "women": ["Women Trained", "Income Growth", "Skill Development", "Entrepreneurship Rate", "Community Impact"],
+            "education": ["Students Benefited", "Books Distributed", "Improved Literacy", "Teacher Involvement", "Dropout Reduction"],
+            "environmental": ["Trees Planted", "Carbon Reduction", "Community Awareness", "Recycling Rate", "Biodiversity Impact"],
+            "disaster": ["People Helped", "Relief Packages", "Shelter Provided", "Medical Assistance", "Recovery Speed"]
+        };
+
+        metrics = metricsMap[reportType];
+        const metricValues = metrics.map(() => (Math.random() * 100).toFixed(2));
+
+        chartData = metricValues;
+
+        csvContent = User Name,Company Name,Amount Contributed,Location,Report Type,Sentiment,${metrics.join(",")}\n +
+            "${userName}","${companyName}","${amount}","${location}","${reportType}","${sentiment}",${metricValues.join(",")};
+
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.setAttribute("href", URL.createObjectURL(blob));
+        link.setAttribute("download", "CSR_Report.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        generateCharts();
+    }
+
+    function generateCharts() {
+        const labels = metrics;
+        const chartContainer = document.getElementById("chartsContainer");
+
+        chartContainer.innerHTML = ''; // Clear previous charts if any
+
+        // Bar Chart (Chart.js)
+        const ctxBar = document.createElement('canvas');
+        chartContainer.appendChild(ctxBar);
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'CSR Metrics',
+                    data: chartData,
+                    backgroundColor: 'rgba(111, 66, 193, 0.5)', /* Violet color */
+                    borderColor: 'rgba(111, 66, 193, 1)', /* Violet color */
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+
+        // Pie Chart (Chart.js)
+        const ctxPie = document.createElement('canvas');
+        chartContainer.appendChild(ctxPie);
+        new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'CSR Metrics',
+                    data: chartData,
+                    backgroundColor: ['rgba(111, 66, 193, 0.5)', 'rgba(255, 99, 132, 0.5)', 'rgba(75, 192, 192, 0.5)', 'rgba(153, 102, 255, 0.5)', 'rgba(255, 159, 64, 0.5)'],
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+
+        // Line Chart (Chart.js)
+        const ctxLine = document.createElement('canvas');
+        chartContainer.appendChild(ctxLine);
+        new Chart(ctxLine, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'CSR Metrics',
+                    data: chartData,
+                    fill: false,
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+
+        // Radar Chart (Chart.js)
+        const ctxRadar = document.createElement('canvas');
+        chartContainer.appendChild(ctxRadar);
+        new Chart(ctxRadar, {
+            type: 'radar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'CSR Metrics',
+                    data: chartData,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    pointBackgroundColor: 'rgba(75, 192, 192, 1)',
+                    pointBorderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    }
+
+    function generateReport(sentiment) {
+        const report = CSR Report Sentiment: ${sentiment}\n\nMetrics: ${metrics.join(", ")}\n\nGenerated by: Automated System;
+        document.getElementById("reportResult").textContent = report;
+    }
+
+    function generatePDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFontSize(16);
+        doc.text("CSR Feedback Report", 20, 20);
+
+        doc.setFontSize(12);
+        doc.text(csvContent, 20, 40);
+
+        doc.addPage();
+        doc.text("Generated Charts", 20, 20);
+
+        const canvas = document.querySelector('canvas');
+        if (canvas) {
+            doc.addImage(canvas, 'PNG', 20, 30, 180, 160);
+        }
+
+        doc.save('CSR_Report.pdf');
+    }
+</script>
+
+</body>
+</html>

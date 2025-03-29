@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        /* General Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: linear-gradient(135deg, #A569BD, #D2B4DE);
+            color: #2E1A47;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h2 {
+            font-size: 30px;
+            color: #2E1A47;
+            margin-bottom: 20px;
+            text-shadow: 0px 3px 8px rgba(142, 68, 173, 0.6);
+        }
+
+        .home-button {
+            background: #2E1A47;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+
+        .home-button:hover {
+            background: #A569BD;
+            box-shadow: 0px 0px 8px #A569BD;
+        }
+
+        #bar-chart, #pie-chart {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            box-shadow: 0px 10px 50px rgba(142, 68, 173, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        iframe {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            box-shadow: 0px 10px 50px rgba(142, 68, 173, 0.4);
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+            color: white;
+            background: rgba(142, 68, 173, 0.5);
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h2 {
+                font-size: 24px;
+            }
+
+            #bar-chart, #pie-chart {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('track_progress') }}" class="home-button">Track Your Progress</a>
+    <h2>Project Metrics</h2>
+
+    <div id="bar-chart" style="width:50%; height:400px; display:inline-block;"></div>
+    <div id="pie-chart" style="width:50%; height:400px; display:inline-block;"></div>
+
+    <iframe src="{{ map_path }}" width="100%" height="500"></iframe>
+
+    <script>
+        var metrics = {{ metrics | tojson }};
+
+        Highcharts.chart('bar-chart', {
+            chart: { type: 'column', backgroundColor: 'transparent' },
+            title: { text: 'Metrics Bar Chart', style: { color: '#2E1A47' } },
+            xAxis: { categories: Object.keys(metrics), labels: { style: { color: '#2E1A47' } } },
+            yAxis: { title: { text: 'Values', style: { color: '#2E1A47' } }, labels: { style: { color: '#2E1A47' } } },
+            series: [{ name: 'Metrics', data: Object.values(metrics), color: '#A569BD' }]
+        });
+
+        Highcharts.chart('pie-chart', {
+            chart: { type: 'pie', backgroundColor: 'transparent' },
+            title: { text: 'Metrics Distribution', style: { color: '#2E1A47' } },
+            series: [{ name: 'Metrics', colorByPoint: true, data:
+                Object.keys(metrics).map(key => ({ name: key, y: metrics[key], color: '#A569BD' })) }]
+        });
+    </script>
+
+    <!-- Footer -->
+    <div class="footer">
+        © 2025 ASSURE-CSR | Designed for Impact
+    </div>
+</body>
+</html>

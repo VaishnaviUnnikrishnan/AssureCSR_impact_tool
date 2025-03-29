@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSR Selection</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: linear-gradient(135deg, #A569BD, #D2B4DE);
+            color: #2E1A47;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .csr-container {
+            width: 90%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0px 10px 30px rgba(142, 68, 173, 0.3);
+            backdrop-filter: blur(20px);
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h2 {
+            font-size: 32px;
+            color: #2E1A47;
+            margin-bottom: 20px;
+            text-shadow: 0px 3px 8px rgba(142, 68, 173, 0.6);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            margin: 15px;
+            background-color: rgba(46, 26, 71, 0.7);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease-in-out;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0px 5px 15px rgba(46, 26, 71, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            background-color: rgba(165, 105, 189, 0.8);
+            box-shadow: 0px 0px 15px #A569BD;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 30px;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            box-shadow: 0px 10px 50px rgba(142, 68, 173, 0.3);
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        th {
+            background-color: rgba(142, 68, 173, 0.5);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-back {
+            display: block;
+            width: fit-content;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .csr-container {
+                width: 100%;
+                padding: 20px;
+            }
+            h2 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="csr-container">
+        <h2>Select CSR Option</h2>
+        <form action="/select_csr" method="POST">
+            <button type="submit" name="csr_option" value="outside_csr" class="btn">Outside CSR</button>
+            <button type="submit" name="csr_option" value="inside_csr" class="btn">Inside CSR</button>
+        </form>
+
+        {% if show_table %}
+            <h3>User Data</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Location (Pincode)</th>
+                        <th>Budget</th>
+                        <th>SubCategory</th>
+                        <th>MainCategory</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in user_data %}
+                        <tr>
+                            <td>{{ row['Location (Pincode)'] }}</td>
+                            <td>{{ row['Budget'] }}</td>
+                            <td>{{ row['SubCategory'] }}</td>
+                            <td>{{ row['MainCategory'] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a href="/" class="btn btn-back">Go to Index</a>
+        {% endif %}
+    </div>
+</body>
+</html>

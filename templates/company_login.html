@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSR Calculator</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        /* General Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: linear-gradient(135deg, #A569BD, #D2B4DE);
+            color: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 15px rgba(142, 68, 173, 0.2);
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 50px;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links li {
+            display: inline-block;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: black;
+            font-weight: 600;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            background: rgba(142, 68, 173, 0.2);
+            box-shadow: 0px 0px 8px #A569BD;
+        }
+
+        /* CSR Calculator Form */
+        .csr-calculator {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            box-shadow: 0px 10px 50px rgba(142, 68, 173, 0.4);
+            border-radius: 15px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .csr-calculator h2 {
+            font-size: 30px;
+            color: #2E1A47;
+            margin-bottom: 20px;
+        }
+
+        .csr-calculator label {
+            display: block;
+            font-size: 16px;
+            color: black;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .csr-calculator input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(142, 68, 173, 0.3);
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            font-size: 16px;
+            color: black;
+        }
+
+        .csr-calculator button {
+            background: #2E1A47;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .csr-calculator button:hover {
+            background: #A569BD;
+            box-shadow: 0px 0px 8px #A569BD;
+        }
+
+        .csr-result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: green;
+            font-weight: 600;
+        }
+
+        .csr-result a button {
+            margin-top: 20px;
+            background: #2E1A47;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .csr-result a button:hover {
+            background: #A569BD;
+            box-shadow: 0px 0px 8px #A569BD;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+            color: white;
+            background: rgba(142, 68, 173, 0.5);
+            width: 100%;
+            position: fixed;
+            bottom: 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .csr-calculator {
+                padding: 20px;
+            }
+
+            .csr-calculator h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+
+
+    <!-- CSR Calculator Form -->
+    <div class="csr-calculator">
+        <h2>CSR Eligibility Calculator</h2>
+        <form action="/calculate_csr/" method="post">
+            <label for="net_worth">Net Worth (in ₹ crores):</label>
+            <input type="number" step="0.01" id="net_worth" name="net_worth" required>
+
+            <label for="turnover">Turnover (in ₹ crores):</label>
+            <input type="number" step="0.01" id="turnover" name="turnover" required>
+
+            <label for="net_profit">Net Profit (in ₹ crores):</label>
+            <input type="number" step="0.01" id="net_profit" name="net_profit" required>
+
+            <button type="submit">Calculate CSR</button>
+        </form>
+
+        {% if csr_result %}
+        <div class="csr-result">
+            <h3>{{ csr_result }}</h3>
+            {% if csr_amount and csr_amount > 0 %}
+            <a href="/project_details/"><button>Go to Project Details</button></a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        © 2025 ASSURE-CSR | Designed for Impact
+    </div>
+
+</body>
+</html>
